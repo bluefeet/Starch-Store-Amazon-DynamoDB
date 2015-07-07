@@ -9,17 +9,19 @@ Web::Starch::Store::AmazonDynamoDB - Session storage backend using Amazon::Dynam
     my $starch = Web::Starch->new(
         store => {
             class => '::AmazonDynamoDB',
-            implementation => 'Amazon::DynamoDB::LWP',
-            version        => '20120810',
-            
-            access_key   => 'access_key',
-            secret_key   => 'secret_key',
-            # or you specify to use an IAM role
-            use_iam_role => 1,
-            
-            host  => 'dynamodb.us-east-1.amazonaws.com',
-            scope => 'us-east-1/dynamodb/aws4_request',
-            ssl   => 1,
+            ddb => {
+                implementation => 'Amazon::DynamoDB::LWP',
+                version        => '20120810',
+                
+                access_key   => 'access_key',
+                secret_key   => 'secret_key',
+                # or you specify to use an IAM role
+                use_iam_role => 1,
+                
+                host  => 'dynamodb.us-east-1.amazonaws.com',
+                scope => 'us-east-1/dynamodb/aws4_request',
+                ssl   => 1,
+            },
         },
     );
 
@@ -27,54 +29,13 @@ Web::Starch::Store::AmazonDynamoDB - Session storage backend using Amazon::Dynam
 
 This Starch store uses L<Amazon::DynamoDB> to set and get session data.
 
-=head1 CONSTRUCTOR
-
-The arguments to this class are automatically shifted into the
-L</dynamodb> argument if the L</dynamodb> argument is not specified. So,
-
-    store => {
-        class          => '::AmazonDynamoDB',
-        implementation => 'Amazon::DynamoDB::LWP',
-        version        => '20120810',
-    },
-
-Is the same as:
-
-    store => {
-        class  => '::AmazonDynamoDB',
-        dynamodb => {
-            implementation => 'Amazon::DynamoDB::LWP',
-            version        => '20120810',
-        },
-    },
-
-Also, don't forget about method proxies which allow you to build
-the L<Amazon::DynamoDB> object using your own code but still specify a static
-configuration.  The below is equivelent to the previous two examples:
-
-    package MyDynamoDB;
-    sub get_dynamodb {
-        my ($class) = @_;
-        return Amazon::DynamoDB->new(
-            implementation => 'Amazon::DynamoDB::LWP',
-            version        => '20120810',
-        );
-    }
-
-    store => {
-        class  => '::AmazonDynamoDB',
-        chi => [ '&proxy', 'MyDynamoDB', 'get_dynamodb' ],
-    },
-
-You can read more about method proxies at
-L<Web::Starch::Manual/METHOD PROXIES>.
-
 =head1 REQUIRED ARGUMENTS
 
-=head2 dynamodb
+=head2 ddb
 
 This must be set to either hash ref arguments for L<Amazon::DynamoDB> or a
-pre-built object (often retrieved using a method proxy).
+pre-built object (often retrieved using a
+L<method proxy|Web::Starch::Manual/METHOD PROXIES>).
 
 When configuring Starch from static configuration files using a
 method proxy is a good way to link your existing L<Amazon::DynamoDB>
@@ -82,26 +43,65 @@ object constructor in with Starch so that starch doesn't build its own.
 
 =head1 OPTIONAL ARGUMENTS
 
+=head2 consistent_read
+
+When C<true> this sets the C<ConsistentRead> flag when calling
+L<get_item> on the L</ddb>.  Defaults to C<true>.
+
+=head2 serializer
+
+A L<Data::Serializer::Raw> for serializing the session data for storage
+in the L</data_field>.  Can be specified as string containing the
+serializer name, a hashref of Data::Serializer::Raw arguments, or as a
+pre-created Data::Serializer::Raw object.  Defaults to C<JSON>.
+
+Consider using the C<JSON::XS> or C<Sereal> serializers for speed.
+
 =head2 session_table
 
-The DynamoDB table name where sessions are stored.
-Defaults to C<sessions>.
+The DynamoDB table name where sessions are stored. Defaults to C<sessions>.
 
-=head2 id_field
+=head2 key_field
 
 The field in the L</session_table> where the session ID is stored.
-Defaults to C<id>.
+Defaults to C<key>.
 
 =head2 expiration_field
 
 The field in the L</session_table> which will hold the epoch
-time when the session should be expired.
-Defaults to C<expiration>.
+time when the session should be expired.  Defaults to C<expiration>.
+
+=head2 data_field
+
+The field in the L</session_table> which will hold the
+session data.  Defaults to C<data>.
 
 =head1 STORE METHODS
 
 See L<Web::Starch::Store> for more documentation about the methods
 which all stores implement.
+
+=head1 METHODS
+
+=head2 create_table_args
+
+Returns the appropriate arguments to use for calling C<create_table>
+on the L</ddb> object.  By default it will look like this:
+
+    {
+        TableName => 'sessions',
+        ReadCapacityUnits => 10,
+        WriteCapacityUnits => 10,
+        AttributeDefinitions => { key => 'S' },
+        KeySchema => [ 'key' ],
+    }
+
+Any arguments you pass will override those in the returned arguments.
+
+=head2 create_table
+
+Creates the L</session_table> by passing any arguments to L</create_table_args>
+and issueing the C<create_table> command on the L</ddb> object.
 
 =head1 AUTHOR
 
