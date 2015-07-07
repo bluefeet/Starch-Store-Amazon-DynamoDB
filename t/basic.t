@@ -10,10 +10,12 @@ if (!$ENV{TEST_DYNAMODB}) {
 
 use Web::Starch;
 
-my $starch = Web::Starch->new(
+my $starch = Web::Starch->new_with_plugins(
+    ['::TimeoutStores'],
     store => {
         class  => '::AmazonDynamoDB',
         session_table => "sessions_$$",
+        timeout => 1,
         ddb => {
             implementation => 'Amazon::DynamoDB::LWP',
             version        => '20120810',

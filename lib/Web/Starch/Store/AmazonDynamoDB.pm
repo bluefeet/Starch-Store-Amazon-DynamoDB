@@ -47,21 +47,6 @@ with qw(
     Web::Starch::Store
 );
 
-around BUILDARGS => sub{
-    my $orig = shift;
-    my $self = shift;
-
-    my $args = $self->$orig( @_ );
-    return $args if exists $args->{ddb};
-
-    my $ddb = $args;
-    $args = { ddb=>$ddb };
-    $args->{factory} = delete( $ddb->{factory} );
-    $args->{max_expires} = delete( $ddb->{max_expires} ) if exists $ddb->{max_expires};
-
-    return $args;
-};
-
 sub BUILD {
   my ($self) = @_;
 
