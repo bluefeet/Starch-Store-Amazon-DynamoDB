@@ -144,13 +144,13 @@ sub _build_serializer {
     );
 }
 
-=head2 session_table
+=head2 table
 
 The DynamoDB table name where sessions are stored. Defaults to C<sessions>.
 
 =cut
 
-has session_table => (
+has table => (
     is      => 'ro',
     isa     => NonEmptySimpleStr,
     default => 'sessions',
@@ -158,7 +158,7 @@ has session_table => (
 
 =head2 key_field
 
-The field in the L</session_table> where the session ID is stored.
+The field in the L</table> where the session ID is stored.
 Defaults to C<key>.
 
 =cut
@@ -171,7 +171,7 @@ has key_field => (
 
 =head2 expiration_field
 
-The field in the L</session_table> which will hold the epoch
+The field in the L</table> which will hold the epoch
 time when the session should be expired.  Defaults to C<expiration>.
 
 =cut
@@ -184,7 +184,7 @@ has expiration_field => (
 
 =head2 data_field
 
-The field in the L</session_table> which will hold the
+The field in the L</table> which will hold the
 session data.  Defaults to C<data>.
 
 =cut
@@ -212,7 +212,7 @@ sub set {
     my $raw = $serializer->serialize( $data );
 
     my $f = $self->ddb->put_item(
-        TableName => $self->session_table(),
+        TableName => $self->table(),
         Item => {
             $self->key_field()        => $key,
             $self->expiration_field() => $expires,
@@ -232,7 +232,7 @@ sub get {
     my $record;
     my $f = $self->ddb->get_item(
         sub{ $record = shift },
-        TableName => $self->session_table(),
+        TableName => $self->table(),
         Key => {
             $self->key_field() => $key,
         },
@@ -257,7 +257,7 @@ sub remove {
     my ($self, $key) = @_;
 
     my $f = $self->ddb->delete_item(
-        TableName => $self->session_table(),
+        TableName => $self->table(),
         Key => {
             $self->key_field() => $key,
         },
@@ -294,7 +294,7 @@ sub create_table_args {
     my $key_field = $self->key_field();
 
     return {
-        TableName => $self->session_table(),
+        TableName => $self->table(),
         ReadCapacityUnits => 10,
         WriteCapacityUnits => 10,
         AttributeDefinitions => {
@@ -307,7 +307,7 @@ sub create_table_args {
 
 =head2 create_table
 
-Creates the L</session_table> by passing any arguments to L</create_table_args>
+Creates the L</table> by passing any arguments to L</create_table_args>
 and issueing the C<create_table> command on the L</ddb> object.
 
 =cut
@@ -338,18 +338,21 @@ sub create_table {
 sub _throw_ddb_error {
     my ($self, $method, $error) = @_;
 
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
+
     my $context = "Amazon::DynamoDB::$method";
 
     if (!ref $error) {
         $error = 'UNDEFINED' if !defined $error;
         croak "$context Unknown Error: $error";
     }
-    elsif (ref($error) eq 'HASH' and defined($error->{Message})) {
+
+    elsif (ref($error) eq 'HASH' and defined($error->{message})) {
         if (defined($error->{type})) {
-            croak "$context: $error->{type}: $error->{Message}";
+            croak "$context: $error->{type}: $error->{message}";
         }
         else {
-            croak "$context: $error->{Message}";
+            croak "$context: $error->{message}";
         }
     }
 

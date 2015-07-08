@@ -14,7 +14,7 @@ my $starch = Web::Starch->new_with_plugins(
     ['::TimeoutStores'],
     store => {
         class  => '::AmazonDynamoDB',
-        session_table => "sessions_$$",
+        table => "sessions_$$",
         timeout => 1,
         ddb => {
             implementation => 'Amazon::DynamoDB::LWP',

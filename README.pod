@@ -57,23 +57,23 @@ pre-created Data::Serializer::Raw object.  Defaults to C<JSON>.
 
 Consider using the C<JSON::XS> or C<Sereal> serializers for speed.
 
-=head2 session_table
+=head2 table
 
 The DynamoDB table name where sessions are stored. Defaults to C<sessions>.
 
 =head2 key_field
 
-The field in the L</session_table> where the session ID is stored.
+The field in the L</table> where the session ID is stored.
 Defaults to C<key>.
 
 =head2 expiration_field
 
-The field in the L</session_table> which will hold the epoch
+The field in the L</table> which will hold the epoch
 time when the session should be expired.  Defaults to C<expiration>.
 
 =head2 data_field
 
-The field in the L</session_table> which will hold the
+The field in the L</table> which will hold the
 session data.  Defaults to C<data>.
 
 =head1 STORE METHODS
@@ -100,7 +100,7 @@ Any arguments you pass will override those in the returned arguments.
 
 =head2 create_table
 
-Creates the L</session_table> by passing any arguments to L</create_table_args>
+Creates the L</table> by passing any arguments to L</create_table_args>
 and issueing the C<create_table> command on the L</ddb> object.
 
 =head1 AUTHOR
