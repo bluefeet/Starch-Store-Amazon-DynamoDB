@@ -195,6 +195,35 @@ has data_field => (
     default => 'data',
 );
 
+=head1 ATTRIBUTES
+
+=head2 can_reap_expired
+
+Returns true, per L<Web::Starch::Store/can_reap_expired>.
+
+=cut
+
+sub can_reap_expired { 1 }
+
+=head1 reap_scan_filter
+
+Returns the data structure used for the C<ScanFilter> argument when
+scanning for session to reap.  This ScanFilter will find all sessions
+which have an L</expiration_field> less than the current time.
+
+=cut
+
+sub reap_scan_filter {
+    my ($self) = @_;
+
+    return {
+        $self->expiration_field() => {
+            ComparisonOperator => 'LT',
+            AttributeValueList => time(),
+        },
+    };
+}
+
 =head1 STORE METHODS
 
 See L<Web::Starch::Store> for more documentation about the methods
@@ -270,6 +299,75 @@ sub remove {
 }
 
 =head1 METHODS
+
+=head2 reap_expired
+
+=cut
+
+sub reap_expired {
+    my ($self) = @_;
+
+    my $ddb = $self->ddb();
+    my $table = $self->table();
+    my $key_field = $self->key_field();
+
+    my @keys;
+
+    $self->log->infof(
+        'Scanning DynamoDB for expired sessions in the %s table.',
+        $table,
+    );
+
+    try {
+        $ddb->scan(
+            sub {
+                my ($record) = @_;
+                push @keys, $record->{ $key_field };
+            },
+            TableName       => $table,
+            AttributesToGet => [ $key_field ],
+            ScanFilter      => $self->reap_scan_filter(),
+        )->get();
+    }
+    catch {
+        $self->_throw_ddb_error( 'scan', $_ )
+    };
+
+    if (!@keys) {
+        $self->log->infof('No expired sessions found in DynamoDB.');
+        return;
+    }
+
+    $self->log->infof(
+        'Deleting %d expired sessions in DynamoDB.',
+        @keys + 0,
+    );
+
+    try {
+        $ddb->batch_write_item(
+            RequestItems => {
+                $table => [
+                    map { {
+                        DeleteRequest => {
+                            Key => { $key_field => $_ },
+                        },
+                    } }
+                    @keys
+                ],
+            },
+        )->get();
+    }
+    catch {
+        $self->_throw_ddb_error( 'batch_write_item', $_ )
+    };
+
+    $self->log->infof(
+        'Finished deleting %d expired sessions from DynamoDB.',
+        @keys + 0,
+    );
+
+    return;
+}
 
 =head2 create_table_args
 
