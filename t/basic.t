@@ -4,8 +4,8 @@ use strictures 2;
 use Test::More;
 use Try::Tiny;
 
-if (!$ENV{TEST_DYNAMODB}) {
-    plan skip_all => 'Run a Local DynamoDB and set TEST_DYNAMODB=1 to run this test.';
+if (!$ENV{AMAZON_DYNAMODB_LOCAL_TESTS}) {
+    plan skip_all => 'Run a Local DynamoDB and set AMAZON_DYNAMODB_LOCAL_TESTS=1 to run this test.';
 }
 
 use Web::Starch;
