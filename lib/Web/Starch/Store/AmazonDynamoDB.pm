@@ -224,80 +224,6 @@ sub reap_scan_filter {
     };
 }
 
-=head1 STORE METHODS
-
-See L<Web::Starch::Store> for more documentation about the methods
-which all stores implement.
-
-=cut
-
-sub set {
-    my ($self, $key, $data, $expires) = @_;
-
-    $expires += time() if $expires;
-
-    my $serializer = $self->serializer();
-
-    my $raw = $serializer->serialize( $data );
-
-    my $f = $self->ddb->put_item(
-        TableName => $self->table(),
-        Item => {
-            $self->key_field()        => $key,
-            $self->expiration_field() => $expires,
-            defined($raw) ? ($self->data_field() => $raw) : (),
-        },
-    );
-
-    try { $f->get() }
-    catch { $self->_throw_ddb_error( 'put_item', $_ ) };
-
-    return;
-}
-
-sub get {
-    my ($self, $key) = @_;
-
-    my $record;
-    my $f = $self->ddb->get_item(
-        sub{ $record = shift },
-        TableName => $self->table(),
-        Key => {
-            $self->key_field() => $key,
-        },
-        AttributesToGet => [ $self->data_field() ],
-        ConsistentRead  => ($self->consistent_read() ? 'true' : 'false'),
-    );
-
-    try { $f->get() }
-    catch { $self->_throw_ddb_error( 'get_item', $_ ) };
-
-    return undef if !$record;
-
-    my $raw = $record->{data};
-    return undef if !defined $raw;
-
-    my $serializer = $self->serializer();
-
-    return $self->serializer->deserialize( $raw );
-}
-
-sub remove {
-    my ($self, $key) = @_;
-
-    my $f = $self->ddb->delete_item(
-        TableName => $self->table(),
-        Key => {
-            $self->key_field() => $key,
-        },
-    );
-
-    try { $f->get() }
-    catch { $self->_throw_ddb_error( 'delete_item', $_ ) };
-
-    return;
-}
-
 =head1 METHODS
 
 =head2 reap_expired
@@ -456,6 +382,80 @@ sub _throw_ddb_error {
 
     require Data::Dumper;
     croak "$context Unknown Error: " . Data::Dumper::Dumper( $error );
+}
+
+=head1 STORE METHODS
+
+See L<Web::Starch::Store> for more documentation about the methods
+which all stores implement.
+
+=cut
+
+sub set {
+    my ($self, $key, $data, $expires) = @_;
+
+    $expires += time() if $expires;
+
+    my $serializer = $self->serializer();
+
+    my $raw = $serializer->serialize( $data );
+
+    my $f = $self->ddb->put_item(
+        TableName => $self->table(),
+        Item => {
+            $self->key_field()        => $key,
+            $self->expiration_field() => $expires,
+            defined($raw) ? ($self->data_field() => $raw) : (),
+        },
+    );
+
+    try { $f->get() }
+    catch { $self->_throw_ddb_error( 'put_item', $_ ) };
+
+    return;
+}
+
+sub get {
+    my ($self, $key) = @_;
+
+    my $record;
+    my $f = $self->ddb->get_item(
+        sub{ $record = shift },
+        TableName => $self->table(),
+        Key => {
+            $self->key_field() => $key,
+        },
+        AttributesToGet => [ $self->data_field() ],
+        ConsistentRead  => ($self->consistent_read() ? 'true' : 'false'),
+    );
+
+    try { $f->get() }
+    catch { $self->_throw_ddb_error( 'get_item', $_ ) };
+
+    return undef if !$record;
+
+    my $raw = $record->{data};
+    return undef if !defined $raw;
+
+    my $serializer = $self->serializer();
+
+    return $self->serializer->deserialize( $raw );
+}
+
+sub remove {
+    my ($self, $key) = @_;
+
+    my $f = $self->ddb->delete_item(
+        TableName => $self->table(),
+        Key => {
+            $self->key_field() => $key,
+        },
+    );
+
+    try { $f->get() }
+    catch { $self->_throw_ddb_error( 'delete_item', $_ ) };
+
+    return;
 }
 
 1;

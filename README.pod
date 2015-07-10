@@ -76,12 +76,21 @@ time when the session should be expired.  Defaults to C<expiration>.
 The field in the L</table> which will hold the
 session data.  Defaults to C<data>.
 
-=head1 STORE METHODS
+=head1 ATTRIBUTES
 
-See L<Web::Starch::Store> for more documentation about the methods
-which all stores implement.
+=head2 can_reap_expired
+
+Returns true, per L<Web::Starch::Store/can_reap_expired>.
+
+=head1 reap_scan_filter
+
+Returns the data structure used for the C<ScanFilter> argument when
+scanning for session to reap.  This ScanFilter will find all sessions
+which have an L</expiration_field> less than the current time.
 
 =head1 METHODS
+
+=head2 reap_expired
 
 =head2 create_table_args
 
@@ -102,6 +111,11 @@ Any arguments you pass will override those in the returned arguments.
 
 Creates the L</table> by passing any arguments to L</create_table_args>
 and issueing the C<create_table> command on the L</ddb> object.
+
+=head1 STORE METHODS
+
+See L<Web::Starch::Store> for more documentation about the methods
+which all stores implement.
 
 =head1 AUTHOR
 
