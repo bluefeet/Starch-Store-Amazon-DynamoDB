@@ -65,8 +65,9 @@ pre-built object (often retrieved using a
 L<method proxy|Web::Starch::Manual/METHOD PROXIES>).
 
 When configuring Starch from static configuration files using a
-method proxy is a good way to link your existing L<Amazon::DynamoDB>
-object constructor in with Starch so that starch doesn't build its own.
+L<method proxy|Web::Starch::Manual/METHOD PROXIES>
+is a good way to link your existing L<Amazon::DynamoDB> object
+constructor in with Starch so that starch doesn't build its own.
 
 =cut
 
@@ -197,14 +198,6 @@ has data_field => (
 
 =head1 ATTRIBUTES
 
-=head2 can_reap_expired
-
-Returns true, per L<Web::Starch::Store/can_reap_expired>.
-
-=cut
-
-sub can_reap_expired { 1 }
-
 =head1 reap_scan_filter
 
 Returns the data structure used for the C<ScanFilter> argument when
@@ -229,6 +222,8 @@ sub reap_scan_filter {
 =head2 reap_expired
 
 =cut
+
+sub can_reap_expired { 1 }
 
 sub reap_expired {
     my ($self) = @_;
@@ -384,10 +379,17 @@ sub _throw_ddb_error {
     croak "$context Unknown Error: " . Data::Dumper::Dumper( $error );
 }
 
-=head1 STORE METHODS
+=head2 set
 
-See L<Web::Starch::Store> for more documentation about the methods
-which all stores implement.
+Set L<Web::Starch::Store/set>.
+
+=head2 get
+
+Set L<Web::Starch::Store/get>.
+
+=head2 remove
+
+Set L<Web::Starch::Store/remove>.
 
 =cut
 
