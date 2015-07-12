@@ -2,13 +2,13 @@
 use strictures 2;
 
 use Test::More;
-use Test::Web::Starch;
+use Test::Starch;
 
 if (!$ENV{AMAZON_DYNAMODB_LOCAL_TESTS}) {
     plan skip_all => 'Run a Local DynamoDB and set AMAZON_DYNAMODB_LOCAL_TESTS=1 to run this test.';
 }
 
-my $tester = Test::Web::Starch->new(
+my $tester = Test::Starch->new(
     plugins => ['::TimeoutStores'],
     args => {
         store => {

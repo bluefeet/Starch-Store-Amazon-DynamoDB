@@ -1,12 +1,12 @@
-package Web::Starch::Store::AmazonDynamoDB;
+package Starch::Store::AmazonDynamoDB;
 
 =head1 NAME
 
-Web::Starch::Store::AmazonDynamoDB - Session storage backend using Amazon::DynamoDB.
+Starch::Store::AmazonDynamoDB - Session storage backend using Amazon::DynamoDB.
 
 =head1 SYNOPSIS
 
-    my $starch = Web::Starch->new(
+    my $starch = Starch->new(
         store => {
             class => '::AmazonDynamoDB',
             ddb => {
@@ -44,7 +44,7 @@ use strictures 2;
 use namespace::clean;
 
 with qw(
-    Web::Starch::Store
+    Starch::Store
 );
 
 sub BUILD {
@@ -62,10 +62,10 @@ sub BUILD {
 
 This must be set to either hash ref arguments for L<Amazon::DynamoDB> or a
 pre-built object (often retrieved using a
-L<method proxy|Web::Starch::Manual/METHOD PROXIES>).
+L<method proxy|Starch::Manual/METHOD PROXIES>).
 
 When configuring Starch from static configuration files using a
-L<method proxy|Web::Starch::Manual/METHOD PROXIES>
+L<method proxy|Starch::Manual/METHOD PROXIES>
 is a good way to link your existing L<Amazon::DynamoDB> object
 constructor in with Starch so that starch doesn't build its own.
 
@@ -381,15 +381,15 @@ sub _throw_ddb_error {
 
 =head2 set
 
-Set L<Web::Starch::Store/set>.
+Set L<Starch::Store/set>.
 
 =head2 get
 
-Set L<Web::Starch::Store/get>.
+Set L<Starch::Store/get>.
 
 =head2 remove
 
-Set L<Web::Starch::Store/remove>.
+Set L<Starch::Store/remove>.
 
 =cut
 
