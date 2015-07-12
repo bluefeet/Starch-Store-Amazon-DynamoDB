@@ -394,13 +394,15 @@ Set L<Starch::Store/remove>.
 =cut
 
 sub set {
-    my ($self, $key, $data, $expires) = @_;
+    my ($self, $id, $namespace, $data, $expires) = @_;
 
     $expires += time() if $expires;
 
     my $serializer = $self->serializer();
 
     my $raw = $serializer->serialize( $data );
+
+    my $key = $self->combine_keys( $id, $namespace );
 
     my $f = $self->ddb->put_item(
         TableName => $self->table(),
@@ -418,7 +420,9 @@ sub set {
 }
 
 sub get {
-    my ($self, $key) = @_;
+    my ($self, $id, $namespace) = @_;
+
+    my $key = $self->combine_keys( $id, $namespace );
 
     my $record;
     my $f = $self->ddb->get_item(
@@ -445,7 +449,9 @@ sub get {
 }
 
 sub remove {
-    my ($self, $key) = @_;
+    my ($self, $id, $namespace) = @_;
+
+    my $key = $self->combine_keys( $id, $namespace );
 
     my $f = $self->ddb->delete_item(
         TableName => $self->table(),
