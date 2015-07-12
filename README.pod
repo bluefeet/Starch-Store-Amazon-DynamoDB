@@ -107,7 +107,7 @@ Any arguments you pass will override those in the returned arguments.
 =head2 create_table
 
 Creates the L</table> by passing any arguments to L</create_table_args>
-and issueing the C<create_table> command on the L</ddb> object.
+and issuing the C<create_table> command on the L</ddb> object.
 
 =head2 set
 

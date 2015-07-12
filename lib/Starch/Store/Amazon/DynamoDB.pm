@@ -327,7 +327,7 @@ sub create_table_args {
 =head2 create_table
 
 Creates the L</table> by passing any arguments to L</create_table_args>
-and issueing the C<create_table> command on the L</ddb> object.
+and issuing the C<create_table> command on the L</ddb> object.
 
 =cut
 
