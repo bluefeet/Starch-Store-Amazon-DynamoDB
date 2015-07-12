@@ -1,14 +1,14 @@
-package Starch::Store::AmazonDynamoDB;
+package Starch::Store::Amazon::DynamoDB;
 
 =head1 NAME
 
-Starch::Store::AmazonDynamoDB - Session storage backend using Amazon::DynamoDB.
+Starch::Store::Amazon::DynamoDB - Session storage backend using Amazon::DynamoDB.
 
 =head1 SYNOPSIS
 
     my $starch = Starch->new(
         store => {
-            class => '::AmazonDynamoDB',
+            class => '::Amazon::DynamoDB',
             ddb => {
                 implementation => 'Amazon::DynamoDB::LWP',
                 version        => '20120810',
