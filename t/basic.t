@@ -9,21 +9,19 @@ if (!$ENV{AMAZON_DYNAMODB_LOCAL_TESTS}) {
 }
 
 my $tester = Test::Starch->new(
-    plugins => ['::TimeoutStores'],
-    args => {
-        store => {
-            class  => '::Amazon::DynamoDB',
-            table => "sessions-$$-$<-" . time(),
-            timeout => 1,
-            ddb => {
-                implementation => 'Amazon::DynamoDB::LWP',
-                version        => '20120810',
-                access_key     => 'access_key',
-                secret_key     => 'secret_key',
-                host  => 'localhost',
-                port  => 8000,
-                scope => 'us-east-1/dynamodb/aws4_request',
-            },
+    plugins => ['::TimeoutStore'],
+    store => {
+        class  => '::Amazon::DynamoDB',
+        table => "sessions-$$-$<-" . time(),
+        timeout => 1,
+        ddb => {
+            implementation => 'Amazon::DynamoDB::LWP',
+            version        => '20120810',
+            access_key     => 'access_key',
+            secret_key     => 'secret_key',
+            host  => 'localhost',
+            port  => 8000,
+            scope => 'us-east-1/dynamodb/aws4_request',
         },
     },
 );
