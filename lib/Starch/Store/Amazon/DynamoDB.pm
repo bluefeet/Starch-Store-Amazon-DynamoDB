@@ -469,6 +469,13 @@ sub remove {
 1;
 __END__
 
+=head1 SUPPORT
+
+Please submit bugs and feature requests to the
+Starch-Store-Amazon-DynamoDB GitHub issue tracker:
+
+L<https://github.com/bluefeet/Starch-Store-Amazon-DynamoDB/issues>
+
 =head1 AUTHOR
 
 Aran Clary Deltac <bluefeetE<64>gmail.com>
@@ -484,4 +491,6 @@ development this distribution would not exist.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=cut
 

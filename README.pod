@@ -121,6 +121,13 @@ Set L<Starch::Store/get>.
 
 Set L<Starch::Store/remove>.
 
+=head1 SUPPORT
+
+Please submit bugs and feature requests to the
+Starch-Store-Amazon-DynamoDB GitHub issue tracker:
+
+L<https://github.com/bluefeet/Starch-Store-Amazon-DynamoDB/issues>
+
 =head1 AUTHOR
 
 Aran Clary Deltac <bluefeetE<64>gmail.com>
