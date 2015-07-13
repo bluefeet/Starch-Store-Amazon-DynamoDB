@@ -60,12 +60,11 @@ sub BUILD {
 
 =head2 ddb
 
-This must be set to either hash ref arguments for L<Amazon::DynamoDB> or a
-pre-built object (often retrieved using a
-L<method proxy|Starch::Manual/METHOD PROXIES>).
+This must be set to either hash ref arguments for L<Amazon::DynamoDB>
+or a pre-built object (often retrieved using a method proxy).
 
 When configuring Starch from static configuration files using a
-L<method proxy|Starch::Manual/METHOD PROXIES>
+L<method proxy|Starch/METHOD PROXIES>
 is a good way to link your existing L<Amazon::DynamoDB> object
 constructor in with Starch so that starch doesn't build its own.
 
@@ -220,6 +219,12 @@ sub reap_scan_filter {
 =head1 METHODS
 
 =head2 reap_expired
+
+This scans the L</table> for all session data which matches the
+L</reap_scan_filter> and deletes the data found.  This could take
+a very long time to run depending on the amount of data.
+Consider setting up a log adapter (see L<Starch/LOGGING>) as this
+method will produce info logs as it runs.
 
 =cut
 
