@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Starch::Store::Amazon::DynamoDB - Session storage backend using Amazon::DynamoDB.
+Starch::Store::Amazon::DynamoDB - Starch storage backend using Amazon::DynamoDB.
 
 =head1 SYNOPSIS
 
@@ -27,7 +27,7 @@ Starch::Store::Amazon::DynamoDB - Session storage backend using Amazon::DynamoDB
 
 =head1 DESCRIPTION
 
-This Starch store uses L<Amazon::DynamoDB> to set and get session data.
+This L<Starch> store uses L<Amazon::DynamoDB> to set and get state data.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -50,7 +50,7 @@ L<get_item> on the L</ddb>.  Defaults to C<true>.
 
 =head2 serializer
 
-A L<Data::Serializer::Raw> for serializing the session data for storage
+A L<Data::Serializer::Raw> for serializing the state data for storage
 in the L</data_field>.  Can be specified as string containing the
 serializer name, a hashref of Data::Serializer::Raw arguments, or as a
 pre-created Data::Serializer::Raw object.  Defaults to C<JSON>.
@@ -59,36 +59,36 @@ Consider using the C<JSON::XS> or C<Sereal> serializers for speed.
 
 =head2 table
 
-The DynamoDB table name where sessions are stored. Defaults to C<sessions>.
+The DynamoDB table name where states are stored. Defaults to C<starch_states>.
 
 =head2 key_field
 
-The field in the L</table> where the session ID is stored.
+The field in the L</table> where the state ID is stored.
 Defaults to C<key>.
 
 =head2 expiration_field
 
 The field in the L</table> which will hold the epoch
-time when the session should be expired.  Defaults to C<expiration>.
+time when the state should be expired.  Defaults to C<expiration>.
 
 =head2 data_field
 
 The field in the L</table> which will hold the
-session data.  Defaults to C<data>.
+state data.  Defaults to C<data>.
 
 =head1 ATTRIBUTES
 
 =head1 reap_scan_filter
 
 Returns the data structure used for the C<ScanFilter> argument when
-scanning for session to reap.  This ScanFilter will find all sessions
+scanning for states to reap.  This ScanFilter will find all states
 which have an L</expiration_field> less than the current time.
 
 =head1 METHODS
 
 =head2 reap_expired
 
-This scans the L</table> for all session data which matches the
+This scans the L</table> for all state data which matches the
 L</reap_scan_filter> and deletes the data found.  This could take
 a very long time to run depending on the amount of data.
 Consider setting up a log adapter (see L<Starch/LOGGING>) as this
@@ -100,7 +100,7 @@ Returns the appropriate arguments to use for calling C<create_table>
 on the L</ddb> object.  By default it will look like this:
 
     {
-        TableName => 'sessions',
+        TableName => 'starch_states',
         ReadCapacityUnits => 10,
         WriteCapacityUnits => 10,
         AttributeDefinitions => { key => 'S' },

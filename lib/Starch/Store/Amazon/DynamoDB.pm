@@ -2,7 +2,7 @@ package Starch::Store::Amazon::DynamoDB;
 
 =head1 NAME
 
-Starch::Store::Amazon::DynamoDB - Session storage backend using Amazon::DynamoDB.
+Starch::Store::Amazon::DynamoDB - Starch storage backend using Amazon::DynamoDB.
 
 =head1 SYNOPSIS
 
@@ -27,7 +27,7 @@ Starch::Store::Amazon::DynamoDB - Session storage backend using Amazon::DynamoDB
 
 =head1 DESCRIPTION
 
-This Starch store uses L<Amazon::DynamoDB> to set and get session data.
+This L<Starch> store uses L<Amazon::DynamoDB> to set and get state data.
 
 =cut
 
@@ -108,7 +108,7 @@ has consistent_read => (
 
 =head2 serializer
 
-A L<Data::Serializer::Raw> for serializing the session data for storage
+A L<Data::Serializer::Raw> for serializing the state data for storage
 in the L</data_field>.  Can be specified as string containing the
 serializer name, a hashref of Data::Serializer::Raw arguments, or as a
 pre-created Data::Serializer::Raw object.  Defaults to C<JSON>.
@@ -146,19 +146,19 @@ sub _build_serializer {
 
 =head2 table
 
-The DynamoDB table name where sessions are stored. Defaults to C<sessions>.
+The DynamoDB table name where states are stored. Defaults to C<starch_states>.
 
 =cut
 
 has table => (
     is      => 'ro',
     isa     => NonEmptySimpleStr,
-    default => 'sessions',
+    default => 'starch_states',
 );
 
 =head2 key_field
 
-The field in the L</table> where the session ID is stored.
+The field in the L</table> where the state ID is stored.
 Defaults to C<key>.
 
 =cut
@@ -172,7 +172,7 @@ has key_field => (
 =head2 expiration_field
 
 The field in the L</table> which will hold the epoch
-time when the session should be expired.  Defaults to C<expiration>.
+time when the state should be expired.  Defaults to C<expiration>.
 
 =cut
 
@@ -185,7 +185,7 @@ has expiration_field => (
 =head2 data_field
 
 The field in the L</table> which will hold the
-session data.  Defaults to C<data>.
+state data.  Defaults to C<data>.
 
 =cut
 
@@ -200,7 +200,7 @@ has data_field => (
 =head1 reap_scan_filter
 
 Returns the data structure used for the C<ScanFilter> argument when
-scanning for session to reap.  This ScanFilter will find all sessions
+scanning for states to reap.  This ScanFilter will find all states
 which have an L</expiration_field> less than the current time.
 
 =cut
@@ -220,7 +220,7 @@ sub reap_scan_filter {
 
 =head2 reap_expired
 
-This scans the L</table> for all session data which matches the
+This scans the L</table> for all state data which matches the
 L</reap_scan_filter> and deletes the data found.  This could take
 a very long time to run depending on the amount of data.
 Consider setting up a log adapter (see L<Starch/LOGGING>) as this
@@ -240,7 +240,7 @@ sub reap_expired {
     my @keys;
 
     $self->log->infof(
-        'Scanning DynamoDB for expired sessions in the %s table.',
+        'Scanning DynamoDB for expired states in the %s table.',
         $table,
     );
 
@@ -260,12 +260,12 @@ sub reap_expired {
     };
 
     if (!@keys) {
-        $self->log->infof('No expired sessions found in DynamoDB.');
+        $self->log->infof('No expired states found in DynamoDB.');
         return;
     }
 
     $self->log->infof(
-        'Deleting %d expired sessions in DynamoDB.',
+        'Deleting %d expired states in DynamoDB.',
         @keys + 0,
     );
 
@@ -288,7 +288,7 @@ sub reap_expired {
     };
 
     $self->log->infof(
-        'Finished deleting %d expired sessions from DynamoDB.',
+        'Finished deleting %d expired states from DynamoDB.',
         @keys + 0,
     );
 
@@ -301,7 +301,7 @@ Returns the appropriate arguments to use for calling C<create_table>
 on the L</ddb> object.  By default it will look like this:
 
     {
-        TableName => 'sessions',
+        TableName => 'starch_states',
         ReadCapacityUnits => 10,
         WriteCapacityUnits => 10,
         AttributeDefinitions => { key => 'S' },
@@ -407,7 +407,7 @@ sub set {
 
     my $raw = $serializer->serialize( $data );
 
-    my $key = $self->combine_keys( $id, $namespace );
+    my $key = $self->manager->stringify_key( $id, $namespace );
 
     my $f = $self->ddb->put_item(
         TableName => $self->table(),
@@ -427,7 +427,7 @@ sub set {
 sub get {
     my ($self, $id, $namespace) = @_;
 
-    my $key = $self->combine_keys( $id, $namespace );
+    my $key = $self->manager->stringify_key( $id, $namespace );
 
     my $record;
     my $f = $self->ddb->get_item(
@@ -456,7 +456,7 @@ sub get {
 sub remove {
     my ($self, $id, $namespace) = @_;
 
-    my $key = $self->combine_keys( $id, $namespace );
+    my $key = $self->manager->stringify_key( $id, $namespace );
 
     my $f = $self->ddb->delete_item(
         TableName => $self->table(),
