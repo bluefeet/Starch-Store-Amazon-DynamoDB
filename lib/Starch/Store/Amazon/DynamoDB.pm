@@ -159,40 +159,27 @@ has table => (
 =head2 key_field
 
 The field in the L</table> where the state ID is stored.
-Defaults to C<key>.
+Defaults to C<__STARCH_KEY__>.
 
 =cut
 
 has key_field => (
     is      => 'ro',
     isa     => NonEmptySimpleStr,
-    default => 'key',
+    default => '__STARCH_KEY__',
 );
 
 =head2 expiration_field
 
 The field in the L</table> which will hold the epoch
-time when the state should be expired.  Defaults to C<expiration>.
+time when the state should be expired.  Defaults to C<__STARCH_EXPIRATION__>.
 
 =cut
 
 has expiration_field => (
     is      => 'ro',
     isa     => NonEmptySimpleStr,
-    default => 'expiration',
-);
-
-=head2 data_field
-
-The field in the L</table> which will hold the
-state data.  Defaults to C<data>.
-
-=cut
-
-has data_field => (
-    is      => 'ro',
-    isa     => NonEmptySimpleStr,
-    default => 'data',
+    default => '__STARCH_EXPIRATION__',
 );
 
 =head1 ATTRIBUTES
@@ -405,7 +392,22 @@ sub set {
 
     my $serializer = $self->serializer();
 
-    my $raw = $serializer->serialize( $data );
+    $data = {
+        map {
+            ref( $data->{$_} )
+            ? ($_ => '__JSON__:' . $serializer->serialize( $data->{$_} ))
+            : (
+                (!defined($data->{$_}))
+                ? ($_ => '__UNDEFINED__')
+                : (
+                    ($data->{$_} !~ m{\S})
+                    ? ($_ => '__STRING__:' . $data->{$_})
+                    : ($_ => $data->{$_})
+                )
+            )
+        }
+        keys( %$data )
+    };
 
     my $key = $self->manager->stringify_key( $id, $namespace );
 
@@ -414,7 +416,7 @@ sub set {
         Item => {
             $self->key_field()        => $key,
             $self->expiration_field() => $expires,
-            defined($raw) ? ($self->data_field() => $raw) : (),
+            %$data,
         },
     );
 
@@ -429,28 +431,42 @@ sub get {
 
     my $key = $self->manager->stringify_key( $id, $namespace );
 
-    my $record;
+    my $data;
     my $f = $self->ddb->get_item(
-        sub{ $record = shift },
+        sub{ $data = shift },
         TableName => $self->table(),
         Key => {
             $self->key_field() => $key,
         },
-        AttributesToGet => [ $self->data_field() ],
         ConsistentRead  => ($self->consistent_read() ? 'true' : 'false'),
     );
 
     try { $f->get() }
     catch { $self->_throw_ddb_error( 'get_item', $_ ) };
 
-    return undef if !$record;
+    return undef if !$data;
 
-    my $raw = $record->{data};
-    return undef if !defined $raw;
+    delete $data->{ $self->key_field() };
+    delete $data->{ $self->expiration_field() };
 
     my $serializer = $self->serializer();
 
-    return $self->serializer->deserialize( $raw );
+    return {
+        map {
+            ($data->{$_} =~ m{^__JSON__:(.*)$})
+            ? ($_ => $serializer->deserialize($1))
+            : (
+                ($data->{$_} eq '__UNDEFINED__')
+                ? ($_ => undef)
+                : (
+                    ($data->{$_} =~ m{^__STRING__:(.*)$})
+                    ? ($_ => $1)
+                    : ($_ => $data->{$_})
+                )
+            )
+        }
+        keys( %$data )
+    };
 }
 
 sub remove {

@@ -64,17 +64,12 @@ The DynamoDB table name where states are stored. Defaults to C<starch_states>.
 =head2 key_field
 
 The field in the L</table> where the state ID is stored.
-Defaults to C<key>.
+Defaults to C<__STARCH_KEY__>.
 
 =head2 expiration_field
 
 The field in the L</table> which will hold the epoch
-time when the state should be expired.  Defaults to C<expiration>.
-
-=head2 data_field
-
-The field in the L</table> which will hold the
-state data.  Defaults to C<data>.
+time when the state should be expired.  Defaults to C<__STARCH_EXPIRATION__>.
 
 =head1 ATTRIBUTES
 
