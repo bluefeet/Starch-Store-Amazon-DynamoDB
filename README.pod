@@ -29,6 +29,53 @@ Starch::Store::Amazon::DynamoDB - Starch storage backend using Amazon::DynamoDB.
 
 This L<Starch> store uses L<Amazon::DynamoDB> to set and get state data.
 
+=head1 SERIALIZATION
+
+State data is stored in DynamoDB in an odd fashion in order to bypass
+some of DynamoDB's and L<Amazon::DynamoDB>'s design limitations.
+
+=over
+
+=item *
+
+Empty strings are stored with the value C<__EMPTY__> as DynamoDB does
+not support empty string values.
+
+=item *
+
+References are serialized using the L</serializer> and prefixed
+with C<__SERIALIZED__:>.  DynamoDB supports array and hash-like
+data types, but L<Amazon::DynamoDB> does not.
+
+=item *
+
+Undefined values are serialized as C<__UNDEF__>, because
+DynamoDB does not support undefined or null values.
+
+=back
+
+This funky serialization is only visibile if you look at the raw
+DynamoDB records.  As an example, here's what the
+L<Starch::State/data> would look like:
+
+    {
+        this => 'that',
+        thing => { goose=>3 },
+        those => [1,2,3],
+        name => '',
+        age => undef,
+        biography => '    ',
+    }
+
+And here's what the record would look like in DynamoDB:
+
+    this: 'that'
+    thing: '__SERIALIZED__:{"goose":3}'
+    those: '__SERIALIZED__:[1,2,3]'
+    name: '__EMPTY__'
+    age: '__UNDEF__'
+    biography: '    '
+
 =head1 REQUIRED ARGUMENTS
 
 =head2 ddb
@@ -51,8 +98,8 @@ L<get_item> on the L</ddb>.  Defaults to C<true>.
 =head2 serializer
 
 A L<Data::Serializer::Raw> for serializing the state data for storage
-in the L</data_field>.  Can be specified as string containing the
-serializer name, a hashref of Data::Serializer::Raw arguments, or as a
+when a field's value is a reference.  Can be specified as string containing
+the serializer name, a hashref of Data::Serializer::Raw arguments, or as a
 pre-created Data::Serializer::Raw object.  Defaults to C<JSON>.
 
 Consider using the C<JSON::XS> or C<Sereal> serializers for speed.

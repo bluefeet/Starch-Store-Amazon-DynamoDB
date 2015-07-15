@@ -29,6 +29,53 @@ Starch::Store::Amazon::DynamoDB - Starch storage backend using Amazon::DynamoDB.
 
 This L<Starch> store uses L<Amazon::DynamoDB> to set and get state data.
 
+=head1 SERIALIZATION
+
+State data is stored in DynamoDB in an odd fashion in order to bypass
+some of DynamoDB's and L<Amazon::DynamoDB>'s design limitations.
+
+=over
+
+=item *
+
+Empty strings are stored with the value C<__EMPTY__> as DynamoDB does
+not support empty string values.
+
+=item *
+
+References are serialized using the L</serializer> and prefixed
+with C<__SERIALIZED__:>.  DynamoDB supports array and hash-like
+data types, but L<Amazon::DynamoDB> does not.
+
+=item *
+
+Undefined values are serialized as C<__UNDEF__>, because
+DynamoDB does not support undefined or null values.
+
+=back
+
+This funky serialization is only visibile if you look at the raw
+DynamoDB records.  As an example, here's what the
+L<Starch::State/data> would look like:
+
+    {
+        this => 'that',
+        thing => { goose=>3 },
+        those => [1,2,3],
+        name => '',
+        age => undef,
+        biography => '    ',
+    }
+
+And here's what the record would look like in DynamoDB:
+
+    this: 'that'
+    thing: '__SERIALIZED__:{"goose":3}'
+    those: '__SERIALIZED__:[1,2,3]'
+    name: '__EMPTY__'
+    age: '__UNDEF__'
+    biography: '    '
+
 =cut
 
 use Amazon::DynamoDB;
@@ -109,8 +156,8 @@ has consistent_read => (
 =head2 serializer
 
 A L<Data::Serializer::Raw> for serializing the state data for storage
-in the L</data_field>.  Can be specified as string containing the
-serializer name, a hashref of Data::Serializer::Raw arguments, or as a
+when a field's value is a reference.  Can be specified as string containing
+the serializer name, a hashref of Data::Serializer::Raw arguments, or as a
 pre-created Data::Serializer::Raw object.  Defaults to C<JSON>.
 
 Consider using the C<JSON::XS> or C<Sereal> serializers for speed.
@@ -395,13 +442,13 @@ sub set {
     $data = {
         map {
             ref( $data->{$_} )
-            ? ($_ => '__JSON__:' . $serializer->serialize( $data->{$_} ))
+            ? ($_ => '__SERIALIZED__:' . $serializer->serialize( $data->{$_} ))
             : (
                 (!defined($data->{$_}))
-                ? ($_ => '__UNDEFINED__')
+                ? ($_ => '__UNDEF__')
                 : (
-                    ($data->{$_} !~ m{\S})
-                    ? ($_ => '__STRING__:' . $data->{$_})
+                    ($data->{$_} eq '')
+                    ? ($_ => '__EMPTY__')
                     : ($_ => $data->{$_})
                 )
             )
@@ -446,21 +493,26 @@ sub get {
 
     return undef if !$data;
 
+    my $expiration = delete $data->{ $self->expiration_field() };
+    if ($expiration and $expiration < time()) {
+        $self->remove( $id, $namespace );
+        return undef;
+    }
+
     delete $data->{ $self->key_field() };
-    delete $data->{ $self->expiration_field() };
 
     my $serializer = $self->serializer();
 
     return {
         map {
-            ($data->{$_} =~ m{^__JSON__:(.*)$})
+            ($data->{$_} =~ m{^__SERIALIZED__:(.*)$})
             ? ($_ => $serializer->deserialize($1))
             : (
-                ($data->{$_} eq '__UNDEFINED__')
+                ($data->{$_} eq '__UNDEF__')
                 ? ($_ => undef)
                 : (
-                    ($data->{$_} =~ m{^__STRING__:(.*)$})
-                    ? ($_ => $1)
+                    ($data->{$_} eq '__EMPTY__')
+                    ? ($_ => '')
                     : ($_ => $data->{$_})
                 )
             )
