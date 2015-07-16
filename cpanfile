@@ -1,5 +1,5 @@
 # Amazon::DynamoDB uses Kavorka which depends on 5.14.
-requires ‘perl' => 5.014_000;`
+requires 'perl' => 5.014;
 
 requires 'Starch'           => 0.01;
 requires 'Amazon::DynamoDB' => 0.35;
