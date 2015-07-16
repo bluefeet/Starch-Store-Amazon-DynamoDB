@@ -119,7 +119,7 @@ constructor in with Starch so that starch doesn't build its own.
 
 has _ddb_arg => (
     is       => 'ro',
-    isa      => HasMethods[ 'put_item', 'get_item', 'delete_item' ] | HashRef,
+    isa      => (HasMethods[ 'put_item', 'get_item', 'delete_item' ]) | HashRef,
     init_arg => 'ddb',
     required => 1,
 );
@@ -166,7 +166,7 @@ Consider using the C<JSON::XS> or C<Sereal> serializers for speed.
 
 has _serializer_arg => (
     is       => 'ro',
-    isa      => InstanceOf[ 'Data::Serializer::Raw' ] | HashRef | NonEmptySimpleStr,
+    isa      => ((InstanceOf[ 'Data::Serializer::Raw' ]) | HashRef) | NonEmptySimpleStr,
     init_arg => 'serializer',
     default  => 'JSON',
 );
