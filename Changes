@@ -2,5 +2,7 @@ Revision history for Perl extension Starch::Store::Amazon::DynamoDB.
 
 {{$NEXT}}
 
+0.01 2015-07-16
+
  - First version.
 
