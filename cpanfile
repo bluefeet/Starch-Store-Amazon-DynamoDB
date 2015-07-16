@@ -11,5 +11,6 @@ requires 'Scalar::Util'     => 0;
 
 on test => sub {
    requires 'Test::Simple' => 0.96;
+   requires 'Test::Fatal'  => 0;
 };
 
