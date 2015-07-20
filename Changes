@@ -1,6 +1,8 @@
 Revision history for Perl extension Starch::Store::Amazon::DynamoDB.
 
 {{$NEXT}}
+
+ - Better Carp caller reporting.
  - Fix Type::Tiny union constraints sometimes failing on Perl < 5.14.
  - Fix several dependency issues.
 

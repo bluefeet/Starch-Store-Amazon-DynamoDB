@@ -84,7 +84,7 @@ use Types::Common::String -types;
 use Scalar::Util qw( blessed );
 use Try::Tiny;
 use Data::Serializer::Raw;
-use Carp qw( croak );
+use Starch::Util qw( croak );
 
 use Moo;
 use strictures 2;
@@ -435,6 +435,8 @@ Set L<Starch::Store/remove>.
 sub set {
     my ($self, $id, $namespace, $data, $expires) = @_;
 
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
+
     $expires += time() if $expires;
 
     my $serializer = $self->serializer();
@@ -475,6 +477,8 @@ sub set {
 
 sub get {
     my ($self, $id, $namespace) = @_;
+
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
 
     my $key = $self->manager->stringify_key( $id, $namespace );
 
@@ -523,6 +527,8 @@ sub get {
 
 sub remove {
     my ($self, $id, $namespace) = @_;
+
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
 
     my $key = $self->manager->stringify_key( $id, $namespace );
 
