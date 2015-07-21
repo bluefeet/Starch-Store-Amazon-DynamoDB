@@ -458,7 +458,7 @@ sub set {
         keys( %$data )
     };
 
-    my $key = $self->manager->stringify_key( $id, $namespace );
+    my $key = $self->stringify_key( $id, $namespace );
 
     my $f = $self->ddb->put_item(
         TableName => $self->table(),
@@ -480,7 +480,7 @@ sub get {
 
     local $Carp::Internal{ (__PACKAGE__) } = 1;
 
-    my $key = $self->manager->stringify_key( $id, $namespace );
+    my $key = $self->stringify_key( $id, $namespace );
 
     my $data;
     my $f = $self->ddb->get_item(
@@ -530,7 +530,7 @@ sub remove {
 
     local $Carp::Internal{ (__PACKAGE__) } = 1;
 
-    my $key = $self->manager->stringify_key( $id, $namespace );
+    my $key = $self->stringify_key( $id, $namespace );
 
     my $f = $self->ddb->delete_item(
         TableName => $self->table(),
