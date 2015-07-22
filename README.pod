@@ -118,6 +118,16 @@ Defaults to C<__STARCH_KEY__>.
 The field in the L</table> which will hold the epoch
 time when the state should be expired.  Defaults to C<__STARCH_EXPIRATION__>.
 
+=head2 connect_on_create
+
+By default when this store is first created it will issue a L</get>.
+This initializes all the LWP and other code so that, in a forked
+environment (such as a web server) this initialization only happens
+once, not on every child's first request, which otherwise would add
+about 50 to 100 ms to the firt request of every child.
+
+Set this to false if you don't want this feature, defaults to C<true>.
+
 =head1 ATTRIBUTES
 
 =head1 reap_scan_filter

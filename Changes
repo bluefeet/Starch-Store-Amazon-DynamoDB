@@ -2,6 +2,9 @@ Revision history for Perl extension Starch::Store::Amazon::DynamoDB.
 
 {{$NEXT}}
 
+ - Issue a no-op get() during store build time to initialize all the
+   LWP stuff which dramatically slows down the first DDB call.
+
 0.02 2015-07-21
 
  - Better Carp caller reporting.

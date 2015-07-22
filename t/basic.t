@@ -14,6 +14,7 @@ my $tester = Test::Starch->new(
         class  => '::Amazon::DynamoDB',
         table => "sessions-$$-$<-" . time(),
         timeout => 1,
+        connect_on_create => 0,
         ddb => {
             implementation => 'Amazon::DynamoDB::LWP',
             version        => '20120810',

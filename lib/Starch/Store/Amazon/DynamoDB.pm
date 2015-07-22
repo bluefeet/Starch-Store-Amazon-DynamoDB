@@ -95,12 +95,18 @@ with qw(
 );
 
 sub BUILD {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  # Get this loaded as early as possible.
-  $self->ddb();
+    # Get this loaded as early as possible.
+    $self->ddb();
 
-  return;
+    if ($self->connect_on_create()) {
+        $self->get(
+            'starch-store-dynamodb-initialization', [],
+        );
+    }
+
+    return;
 }
 
 =head1 REQUIRED ARGUMENTS
@@ -227,6 +233,24 @@ has expiration_field => (
     is      => 'ro',
     isa     => NonEmptySimpleStr,
     default => '__STARCH_EXPIRATION__',
+);
+
+=head2 connect_on_create
+
+By default when this store is first created it will issue a L</get>.
+This initializes all the LWP and other code so that, in a forked
+environment (such as a web server) this initialization only happens
+once, not on every child's first request, which otherwise would add
+about 50 to 100 ms to the firt request of every child.
+
+Set this to false if you don't want this feature, defaults to C<true>.
+
+=cut
+
+has connect_on_create => (
+    is      => 'ro',
+    isa     => Bool,
+    default => 1,
 );
 
 =head1 ATTRIBUTES
