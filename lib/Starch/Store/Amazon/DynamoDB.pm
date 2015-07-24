@@ -94,7 +94,7 @@ with qw(
     Starch::Store
 );
 
-sub BUILD {
+after BUILD => sub{
     my ($self) = @_;
 
     # Get this loaded as early as possible.
@@ -107,7 +107,7 @@ sub BUILD {
     }
 
     return;
-}
+};
 
 =head1 REQUIRED ARGUMENTS
 

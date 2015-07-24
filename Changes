@@ -2,6 +2,8 @@ Revision history for Perl extension Starch::Store::Amazon::DynamoDB.
 
 {{$NEXT}}
 
+ - Properly extend the BUILD method.
+
 0.03 2015-07-22
 
  - Issue a no-op get() during store build time to initialize all the
