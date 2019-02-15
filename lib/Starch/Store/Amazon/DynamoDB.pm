@@ -1,5 +1,7 @@
 package Starch::Store::Amazon::DynamoDB;
 
+$Starch::Store::Amazon::DynamoDB::VERSION = '0.04';
+
 =head1 NAME
 
 Starch::Store::Amazon::DynamoDB - Starch storage backend using Amazon::DynamoDB.
