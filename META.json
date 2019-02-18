@@ -57,7 +57,7 @@
       },
       "test" : {
          "requires" : {
-            "JSON" : "2",
+            "JSON" : "2.00",
             "Test2::V0" : "0.000094"
          }
       }
@@ -74,7 +74,7 @@
          "web" : "https://github.com/bluefeet/Starch-Store-Amazon-DynamoDB"
       }
    },
-   "version" : "0.04",
+   "version" : "0.05",
    "x_contributors" : [
       "Aran Deltac <aran@ziprecruiter.com>"
    ],
