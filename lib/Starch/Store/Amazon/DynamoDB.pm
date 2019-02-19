@@ -1,6 +1,6 @@
 package Starch::Store::Amazon::DynamoDB;
 
-$Starch::Store::Amazon::DynamoDB::VERSION = '0.05';
+our $VERSION = '0.05';
 
 =head1 NAME
 
