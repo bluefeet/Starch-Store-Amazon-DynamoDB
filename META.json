@@ -74,7 +74,7 @@
          "web" : "https://github.com/bluefeet/Starch-Store-Amazon-DynamoDB"
       }
    },
-   "version" : "0.05",
+   "version" : "0.06",
    "x_contributors" : [
       "Aran Deltac <aran@ziprecruiter.com>"
    ],

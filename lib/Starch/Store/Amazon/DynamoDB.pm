@@ -1,7 +1,7 @@
 package Starch::Store::Amazon::DynamoDB;
 use 5.014000;
 use strictures 2;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 NAME
 
