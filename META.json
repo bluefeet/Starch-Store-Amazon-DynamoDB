@@ -43,7 +43,6 @@
       "runtime" : {
          "requires" : {
             "Amazon::DynamoDB" : "0.35",
-            "Carp" : "0",
             "Data::Serializer" : "0.60",
             "Moo" : "2.000000",
             "Scalar::Util" : "0",

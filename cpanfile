@@ -10,7 +10,6 @@ requires 'Type::Tiny' => '1.000005';
 requires 'Try::Tiny' => '0.18';
 requires 'Data::Serializer' => '0.60';
 
-requires 'Carp';
 requires 'Scalar::Util';
 
 on test => sub {

@@ -2,6 +2,8 @@ Revision history for Perl extension Starch-Store-Amazon-DynamoDB.
 
 {{$NEXT}}
 
+ - Remove Carp dependency.
+
 0.06 2019-02-20T18:48:27Z
 
  - Require Starch 0.11 so that we get the better croak.
